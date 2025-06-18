@@ -1,54 +1,58 @@
 # Medical Clinic API Documentation
 
-## Project Setup Instructions
+## Project Overview
 
-1. **System Requirements**:
+This API delivers a robust solution for managing a medical clinic's appointment system, utilizing a **Repository-Service-Controller (RSC)** architectural pattern integrated with Laravel’s MVC framework. Authentication is secured via **Laravel Sanctum**, with role-based access control for admin, doctor, receptionist, and patient roles.
 
-   - PHP 8.2 or higher.
-   - Composer.
-   - XAMPP (for running Apache and MySQL locally).
-   - MySQL database.
+## Setup and Installation
 
-2. **Steps**:
+### System Requirements
 
-   - Clone or download the project from the repository.
-   - Open a terminal (Terminal) in the project directory.
-   - Install dependencies using:
+- PHP 8.2 or higher
+- Composer
+- XAMPP (for local Apache and MySQL services)
+- MySQL database
 
-     ```bash
-     composer install
-     ```
-   - Set up a database in XAMPP:
-     - Open phpMyAdmin (via `http://localhost/phpmyadmin`).
-     - Create a new database named `clinic_api` (or any name you prefer).
-   - Configure the `.env` file by copying `.env.example` and editing the variables:
-     - `DB_DATABASE=clinic_api`
-     - `DB_USERNAME=root` (default in XAMPP)
-     - `DB_PASSWORD=` (leave empty if no password is set)
-   - Apply migrations to create the database tables:
+### Installation Steps
 
-     ```bash
-     php artisan migrate
-     ```
-   - Seed the initial data: **This step is mandatory to add roles (roles) and basic data**:
+1. Clone or download the project repository.
+2. Navigate to the project directory via terminal.
+3. Install dependencies:
 
-     ```bash
-     php artisan db:seed
-     ```
-   - Start the server:
+   ```bash
+   composer install
+   ```
+4. Configure the database in XAMPP:
+   - Access phpMyAdmin at `http://localhost/phpmyadmin`.
+   - Create a new database named `clinic_api` (or a custom name).
+5. Set up the `.env` file by duplicating `.env.example` and updating:
+   - `DB_DATABASE=clinic_api`
+   - `DB_USERNAME=root` (XAMPP default)
+   - `DB_PASSWORD=` (leave empty unless a password is set)
+6. Execute migrations to initialize database tables:
 
-     ```bash
-     php artisan serve
-     ```
-   - Open a browser or Postman at `http://localhost:8000`.
+   ```bash
+   php artisan migrate
+   ```
+7. Seed initial data (mandatory for role setup):
 
-## API Endpoints Details
+   ```bash
+   php artisan db:seed
+   ```
+8. Launch the development server:
+
+   ```bash
+   php artisan serve
+   ```
+9. Access the API via browser or Postman at `http://localhost:8000`.
+
+## API Endpoints
 
 ### 1. Authentication
 
 - **POST /api/login**
-  - Description: Log in to obtain an access token.
-  - Body:
+  - **Purpose**: Authenticate and retrieve an access token.
+  - **Request Body**:
 
     ```json
     {
@@ -56,7 +60,7 @@
         "password": "string"
     }
     ```
-  - Response (200):
+  - **Response (200)**:
 
     ```json
     {
@@ -65,8 +69,8 @@
     }
     ```
 - **POST /api/register**
-  - Description: Register a new user.
-  - Body:
+  - **Purpose**: Register a new user with a specified role.
+  - **Request Body**:
 
     ```json
     {
@@ -76,7 +80,7 @@
         "role": "admin|doctor|receptionist|patient"
     }
     ```
-  - Response (201):
+  - **Response (201)**:
 
     ```json
     {
@@ -88,26 +92,39 @@
 ### 2. Appointment Management
 
 - **GET /api/appointments**
-  - Description: Retrieve a list of appointments based on role (admin: all appointments, doctor: doctor’s appointments, patient: patient’s appointments, receptionist: appointments without patient data).
-  - Headers: `Authorization: Bearer <token>`
-  - Response (200):
-
-    ```json
-    [
-        {
-            "id": integer,
-            "doctor_name": "string",
-            "patient_name": "string" (except for receptionist),
-            "appointment_time": "datetime",
-            "created_at": "datetime",
-            "updated_at": "datetime"
-        }
-    ]
-    ```
+  - **Purpose**: Retrieve appointments filtered by user role (admin: all, doctor: own, patient: own, receptionist: all details except patient name).
+  - **Headers**: `Authorization: Bearer <token>`
+  - **Query Parameters**: `?date=YYYY-MM-DD&doctor_id=integer` (optional filters)
+  - **Response (200)**:
+    - For admin, doctor, patient:
+      ```json
+      [
+          {
+              "id": integer,
+              "doctor_name": "string",
+              "patient_name": "string",
+              "appointment_time": "datetime",
+              "created_at": "datetime",
+              "updated_at": "datetime"
+          }
+      ]
+      ```
+    - For receptionist:
+      ```json
+      [
+          {
+              "id": integer,
+              "doctor_name": "string",
+              "appointment_time": "datetime",
+              "created_at": "datetime",
+              "updated_at": "datetime"
+          }
+      ]
+      ```
 - **POST /api/appointments**
-  - Description: Add a new appointment.
-  - Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-  - Body:
+  - **Purpose**: Create a new appointment.
+  - **Headers**: `Authorization: Bearer <token>`, `Content-Type: application/json`
+  - **Request Body**:
 
     ```json
     {
@@ -115,7 +132,7 @@
         "appointment_time": "datetime"
     }
     ```
-  - Response (201):
+  - **Response (201)**:
 
     ```json
     {
@@ -125,16 +142,16 @@
     }
     ```
 - **PUT /api/appointments/{id}**
-  - Description: Update an existing appointment.
-  - Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-  - Body:
+  - **Purpose**: Update an existing appointment’s time.
+  - **Headers**: `Authorization: Bearer <token>`, `Content-Type: application/json`
+  - **Request Body**:
 
     ```json
     {
         "appointment_time": "datetime"
     }
     ```
-  - Response (200):
+  - **Response (200)**:
 
     ```json
     {
@@ -143,27 +160,29 @@
         "appointment_time": "datetime"
     }
     ```
+  - **Error (422)**: `{"message": "Time slot already booked"}` if conflicted.
 - **DELETE /api/appointments/{id}**
-  - Description: Delete an appointment.
-  - Headers: `Authorization: Bearer <token>`
-  - Response (200):
+  - **Purpose**: Remove an appointment.
+  - **Headers**: `Authorization: Bearer <token>`
+  - **Response (200)**:
 
     ```json
     {
         "message": "Appointment deleted"
     }
     ```
+  - **Error (404)**: `{"message": "Appointment not found"}` if non-existent.
 
 ## Postman Usage Examples
 
-### 1. Register Users
+### 1. User Registration
 
-Before testing other endpoints, register one user for each role.
+Register users for each role before testing other endpoints.
 
 - **Method**: POST
 - **URL**: `http://localhost:8000/api/register`
 - **Headers**: `Content-Type: application/json`
-- **Body** (for each role):
+- **Request Body** (per role):
   - **Admin**:
 
     ```json
@@ -174,7 +193,7 @@ Before testing other endpoints, register one user for each role.
         "role": "admin"
     }
     ```
-    - **Expected Response** (201): Token in the body.
+    - **Expected Response (201)**: Contains a token.
   - **Doctor**:
 
     ```json
@@ -205,14 +224,14 @@ Before testing other endpoints, register one user for each role.
         "role": "patient"
     }
     ```
-  - Copy the tokens from the responses for use in subsequent requests.
+  - Save tokens from responses for subsequent requests.
 
-### 2. Login
+### 2. User Login
 
 - **Method**: POST
 - **URL**: `http://localhost:8000/api/login`
 - **Headers**: `Content-Type: application/json`
-- **Body** (example for Admin):
+- **Request Body** (e.g., Admin):
 
   ```json
   {
@@ -220,24 +239,24 @@ Before testing other endpoints, register one user for each role.
       "password": "password123"
   }
   ```
-- **Expected Response**: Token in the body.
+- **Expected Response**: Contains a token.
 
-### 3. Add Appointment (Receptionist)
+### 3. Create Appointment (Receptionist)
 
 - **Method**: POST
 - **URL**: `http://localhost:8000/api/appointments`
 - **Headers**:
-  - `Authorization: Bearer <recep_token>` (replace with token from receptionist registration).
+  - `Authorization: Bearer <recep_token>`
   - `Content-Type: application/json`
-- **Body**:
+- **Request Body**:
 
   ```json
   {
-      "doctor_id": 2,  // Doctor ID from registration
+      "doctor_id": 2,
       "appointment_time": "2025-06-18 12:00:00"
   }
   ```
-- **Expected Response** (201):
+- **Expected Response (201)**:
 
   ```json
   {
@@ -254,14 +273,14 @@ Before testing other endpoints, register one user for each role.
 - **Headers**:
   - `Authorization: Bearer <recep_token>`
   - `Content-Type: application/json`
-- **Body**:
+- **Request Body**:
 
   ```json
   {
       "appointment_time": "2025-06-18 12:30:00"
   }
   ```
-- **Expected Response** (200):
+- **Expected Response (200)**:
 
   ```json
   {
@@ -270,10 +289,24 @@ Before testing other endpoints, register one user for each role.
       "appointment_time": "2025-06-18 12:30:00"
   }
   ```
+- **Error (422)**: `{"message": "Time slot already booked"}` if conflicted.
 
 ### 5. Delete Appointment (Receptionist)
 
 - **Method**: DELETE
 - **URL**: `http://localhost:8000/api/appointments/1`
 - **Headers**: `Authorization: Bearer <recep_token>`
-- **Expected Response** (
+- **Expected Response (200)**:
+
+  ```json
+  {
+      "message": "Appointment deleted"
+  }
+  ```
+- **Error (404)**: `{"message": "Appointment not found"}` if non-existent.
+
+## Additional Notes
+
+- Set `APP_DEBUG=false` in `.env` for production to suppress stack traces.
+- Role-based access is enforced via custom `RoleMiddleware`.
+- Test endpoints sequentially, starting with registration and login.

@@ -31,6 +31,7 @@ class AppointmentController extends Controller
             return response()->json(['message' => $e->getMessage()], 422);
         }
     }
+
     public function show($id)
     {
         $appointment = $this->appointmentService->getAppointment($id);
@@ -39,13 +40,21 @@ class AppointmentController extends Controller
 
     public function update(UpdateAppointmentRequest $request, $id)
     {
-        $appointment = $this->appointmentService->updateAppointment($id, $request->validated());
-        return response()->json($appointment);
+        try {
+            $appointment = $this->appointmentService->updateAppointment($id, $request->validated());
+            return response()->json($appointment, 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], $e->getCode() ?: 422);
+        }
     }
 
     public function destroy($id)
     {
-        $this->appointmentService->deleteAppointment($id);
-        return response()->json(['message' => 'Appointment deleted']);
+        try {
+            $this->appointmentService->deleteAppointment($id);
+            return response()->json(['message' => 'Appointment deleted'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], $e->getCode() ?: 404);
+        }
     }
 }
