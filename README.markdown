@@ -92,9 +92,12 @@ This API delivers a robust solution for managing a medical clinic's appointment 
 ### 2. Appointment Management
 
 - **GET /api/appointments**
-  - **Purpose**: Retrieve appointments filtered by user role (admin: all, doctor: own, patient: own, receptionist: all details except patient name).
+  - **Purpose**: Retrieve appointments filtered by user role (admin: all, doctor: own, patient: own, receptionist: all details except patient name) and optional query parameters.
   - **Headers**: `Authorization: Bearer <token>`
-  - **Query Parameters**: `?date=YYYY-MM-DD&doctor_id=integer` (optional filters)
+  - **Query Parameters**:
+    - `date=YYYY-MM-DD`: Filter by appointment date.
+    - `doctor_id=integer`: Filter by doctor ID.
+    - Both can be combined (e.g., `?date=2025-06-18&doctor_id=2`).
   - **Response (200)**:
     - For admin, doctor, patient:
       ```json
@@ -304,6 +307,26 @@ Register users for each role before testing other endpoints.
   }
   ```
 - **Error (404)**: `{"message": "Appointment not found"}` if non-existent.
+
+### 6. Get Appointments with Filters
+
+- **Filter by Date Only**
+  - **Method**: GET
+  - **URL**: `http://localhost:8000/api/appointments?date=2025-06-18`
+  - **Headers**: `Authorization: Bearer <token>`
+  - **Expected Response (200)**: Appointments for June 18, 2025, filtered by role.
+
+- **Filter by Doctor ID Only**
+  - **Method**: GET
+  - **URL**: `http://localhost:8000/api/appointments?doctor_id=2`
+  - **Headers**: `Authorization: Bearer <token>`
+  - **Expected Response (200)**: Appointments for doctor ID 2, filtered by role.
+
+- **Filter by Both Date and Doctor ID**
+  - **Method**: GET
+  - **URL**: `http://localhost:8000/api/appointments?date=2025-06-18&doctor_id=2`
+  - **Headers**: `Authorization: Bearer <token>`
+  - **Expected Response (200)**: Appointments for June 18, 2025, for doctor ID 2, filtered by role.
 
 ## Additional Notes
 
